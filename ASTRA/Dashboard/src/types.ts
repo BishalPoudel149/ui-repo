@@ -17,8 +17,10 @@ export interface NewsItem {
   description: string;
   impact: 'high' | 'medium' | 'low';
   timestamp: string;
-  category: 'interest' | 'exchange';
+  url: string;
+  source: string;
 }
+
 
 export interface ChartData {
   date: string;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Save, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import type { Alert, Currency } from '../types';
 
 const currencies: Currency[] = [
@@ -17,11 +17,12 @@ export default function AlertsConfig() {
   const addAlert = () => {
     const newAlert: Alert = {
       id: crypto.randomUUID(),
-      type: 'interest',
+      type: 'exchange',
       currency: 'USD',
-      upperThreshold: 0,
-      lowerThreshold: 0,
-      enabled: true,
+      compareCurrency: 'INR',
+      upperThreshold: 95,
+      lowerThreshold: 85,
+      enabled: false,
       createdAt: new Date().toISOString()
     };
     setAlerts([...alerts, newAlert]);
@@ -37,6 +38,30 @@ export default function AlertsConfig() {
     ));
   };
 
+  const enableAlert = (alert: Alert) => {
+    const alertData = {
+      userId: email,
+      baseCurrency: alert.currency,
+      targetCurrency: alert.compareCurrency,
+      lowThreshold: alert.lowerThreshold,
+      highThreshold: alert.upperThreshold
+    };
+
+    fetch('http://localhost:3600/forex-alerts/forex', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(alertData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Alert enabled:', data);
+      updateAlert(alert.id, { enabled: true });
+    })
+    .catch(error => console.error('Error enabling alert:', error));
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -49,7 +74,6 @@ export default function AlertsConfig() {
           <span>Add Alert</span>
         </button>
       </div>
-
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
         <div className="max-w-md">
@@ -68,7 +92,6 @@ export default function AlertsConfig() {
           </p>
         </div>
       </div>
-
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-semibold mb-6">Configured Thresholds</h2>
         <div className="space-y-6">
@@ -139,13 +162,12 @@ export default function AlertsConfig() {
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={alert.enabled}
-                  onChange={(e) => updateAlert(alert.id, { enabled: e.target.checked })}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label className="text-sm text-gray-700">Enable Alert</label>
+                <button
+                  onClick={() => enableAlert(alert)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Enable Alert
+                </button>
               </div>
             </div>
           ))}
