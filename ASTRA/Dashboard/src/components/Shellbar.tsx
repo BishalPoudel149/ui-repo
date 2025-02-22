@@ -49,6 +49,15 @@ export default function Shellbar() {
                 <AlertTriangle className="w-4 h-4" />
                 <span>Set Threshold</span>
               </Link>
+              <Link
+                to="/smart-analysis"
+                className={`flex items-center space-x-2 ${
+                  location.pathname === '/smart-analysis' ? 'text-white' : 'text-indigo-200 hover:text-white'
+                }`}
+              >
+                <LineChart className="w-4 h-4" />
+                <span>Smart Analysis</span>
+              </Link>
             </nav>
           </div>
           

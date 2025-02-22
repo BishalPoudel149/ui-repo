@@ -5,7 +5,7 @@ import type { ForecastParameter } from '../types';
 const parameters: ForecastParameter[] = [
   { name: 'GDP Growth', value: 2.5, unit: '%' },
   { name: 'Inflation Rate', value: 3.2, unit: '%' },
-  { name: 'Current Account', value: -2.1, unit: 'B' }
+  { name: 'Forward Rate', value: 5.1, unit: '%' }
 ];
 
 export default function ForecastPanel() {

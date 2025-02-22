@@ -4,6 +4,7 @@ import Shellbar from './components/Shellbar';
 import ChartsDashboard from './pages/ChartsDashboard';
 import MarketInsights from './pages/MarketInsights';
 import AlertsConfig from './pages/AlertsConfig';
+import WebSocketClientEmbed from './components/WebSocketClientEmbed';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/" element={<ChartsDashboard />} />
             <Route path="/insights" element={<MarketInsights />} />
             <Route path="/alerts" element={<AlertsConfig />} />
+            <Route path="/smart-analysis" element={<WebSocketClientEmbed />} />
           </Routes>
         </main>
       </div>

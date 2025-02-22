@@ -60,23 +60,23 @@ export default function NewsSection() {
               className="border-l-4 border-indigo-500 bg-gray-50 p-4 rounded-r-lg"
             >
               <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">{news.title}</h3>
-                  <p className="text-gray-600 mt-1">{news.description}</p>
-                  <a href={news.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
-                    Read more
-                  </a>
-                </div>
-                <span className={`px-2 py-1 rounded text-sm ${
-                  news.impact === 'high' ? 'bg-red-100 text-red-800' :
-                  news.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-green-100 text-green-800'
-                }`}>
-                  {news.impact.toUpperCase()}
-                </span>
+              <div>
+                <h3 className="font-semibold text-lg">{news.title}</h3>
+                <p className="text-gray-600 mt-1">{news.description}</p>
+                <a href={news.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                Read more
+                </a>
+              </div>
+              <span className={`px-2 py-1 rounded text-sm ${
+                news.impact === 'high' ? 'bg-red-100 text-red-800' :
+                news.impact === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-green-100 text-green-800'
+              }`}>
+                {news.impact.toUpperCase()}
+              </span>
               </div>
               <div className="mt-2 text-sm text-gray-500">
-                {new Date(news.timestamp).toLocaleString()}
+              <p className="text-gray-600 mt-1">{new Date(news.timestamp).toLocaleString()} <span>&nbsp;&nbsp;&nbsp;&nbsp;</span> Source: {news.source}</p>
               </div>
             </div>
           ))}
