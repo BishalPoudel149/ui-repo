@@ -51,6 +51,7 @@ export interface Alert {
 
 export interface Notification {
   id: string;
+  currentRate: string;
   title: string;
   message: string;
   type: 'alert' | 'system';

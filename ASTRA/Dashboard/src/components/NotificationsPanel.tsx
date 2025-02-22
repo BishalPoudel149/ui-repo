@@ -3,24 +3,24 @@ import { Bell, X } from 'lucide-react';
 import type { Notification } from '../types';
 
 // Mock notifications data
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'EUR/USD Alert',
-    message: 'Exchange rate has exceeded upper threshold of 1.20',
-    type: 'alert',
-    read: false,
-    timestamp: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: 'System Update',
-    message: 'New market data available for analysis',
-    type: 'system',
-    read: true,
-    timestamp: new Date(Date.now() - 86400000).toISOString()
-  }
-];
+// const mockNotifications: Notification[] = [
+//   {
+//     id: '1',
+//     title: 'EUR/USD Alert',
+//     message: 'Exchange rate has exceeded upper threshold of 1.20',
+//     type: 'alert',
+//     read: false,
+//     timestamp: new Date().toISOString()
+//   },
+//   {
+//     id: '2',
+//     title: 'System Update',
+//     message: 'New market data available for analysis',
+//     type: 'system',
+//     read: true,
+//     timestamp: new Date(Date.now() - 86400000).toISOString()
+//   }
+// ];
 
 interface NotificationsPanelProps {
   isOpen: boolean;
@@ -38,6 +38,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
         const parsedData = JSON.parse(event.data);
         const newNotification: Notification = {
           id: parsedData.id,
+          currentRate: parsedData.currentRate,
           title: parsedData.BASECURRENCY ? `${parsedData.BASECURRENCY}/${parsedData.TARGETCURRENCY} Alert` : `${parsedData.currencyPair} Alert`,
           message: parsedData.HIGHTHRESHOLD ? `Exchange rate has exceeded upper threshold of ${parsedData.HIGHTHRESHOLD}` : `Exchange rate is ${parsedData.threshold}`,
           type: 'alert',
@@ -93,6 +94,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                        <p className="text-sm font-medium text-gray-900">Current Rate: {notification.currentRate}</p>
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="mt-1 text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</p>
                       </div>
