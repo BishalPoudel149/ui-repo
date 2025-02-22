@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import type { Notification } from '../types';
 
 // Mock notifications data
-const notifications: Notification[] = [
+const mockNotifications: Notification[] = [
   {
     id: '1',
     title: 'EUR/USD Alert',
@@ -28,12 +28,41 @@ interface NotificationsPanelProps {
 }
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const eventSource = new EventSource('https://nestjs-backend.cfapps.us10-001.hana.ondemand.com/forex-notifications/stream');
+
+      eventSource.onmessage = (event) => {
+        const parsedData = JSON.parse(event.data);
+        const newNotification: Notification = {
+          id: parsedData.id,
+          title: parsedData.BASECURRENCY ? `${parsedData.BASECURRENCY}/${parsedData.TARGETCURRENCY} Alert` : `${parsedData.currencyPair} Alert`,
+          message: parsedData.HIGHTHRESHOLD ? `Exchange rate has exceeded upper threshold of ${parsedData.HIGHTHRESHOLD}` : `Exchange rate is ${parsedData.threshold}`,
+          type: 'alert',
+          read: false,
+          timestamp: parsedData.TIMESTAMP || parsedData.timestamp,
+        };
+        setNotifications((prevNotifications) => [newNotification, ...prevNotifications]);
+      };
+
+      eventSource.onerror = (error) => {
+        console.error('Error with SSE connection:', error);
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       <div className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
-      
       <div className="fixed inset-y-0 right-0 pl-10 max-w-full flex">
         <div className="w-screen max-w-md">
           <div className="h-full flex flex-col bg-white shadow-xl">
@@ -60,20 +89,12 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
                   >
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0">
-                        <Bell className={`h-6 w-6 ${
-                          notification.type === 'alert' ? 'text-red-600' : 'text-blue-600'
-                        }`} />
+                        <Bell className={`h-6 w-6 ${notification.type === 'alert' ? 'text-red-600' : 'text-blue-600'}`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {notification.message}
-                        </p>
-                        <p className="mt-1 text-xs text-gray-500">
-                          {new Date(notification.timestamp).toLocaleString()}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                        <p className="text-sm text-gray-500">{notification.message}</p>
+                        <p className="mt-1 text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>

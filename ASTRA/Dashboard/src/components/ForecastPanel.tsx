@@ -10,8 +10,8 @@ const parameters: ForecastParameter[] = [
 
 export default function ForecastPanel() {
   const [forecast, setForecast] = useState({
-    interestRate: 4.25,
-    exchangeRate: 1.18
+    interestRate: 6.25,
+    exchangeRate: 86.65
   });
 
   return (
@@ -34,7 +34,7 @@ export default function ForecastPanel() {
             <DollarSign className="text-emerald-600 w-6 h-6" />
           </div>
           <p className="text-3xl font-bold text-emerald-600">{forecast.exchangeRate}</p>
-          <p className="text-sm text-gray-600 mt-2">EUR/USD</p>
+          <p className="text-sm text-gray-600 mt-2">USD/INR</p>
         </div>
       </div>
 

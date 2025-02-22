@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Edit3 } from 'lucide-react';
 import type { Alert, Currency } from '../types';
 
 const currencies: Currency[] = [
@@ -10,9 +10,22 @@ const currencies: Currency[] = [
   { code: 'INR', name: 'Indian Rupee' },
 ];
 
+const ALERTS_STORAGE_KEY = 'alerts';
+
 export default function AlertsConfig() {
   const [email, setEmail] = useState('');
   const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  useEffect(() => {
+    const savedAlerts = localStorage.getItem(ALERTS_STORAGE_KEY);
+    if (savedAlerts) {
+      setAlerts(JSON.parse(savedAlerts));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(ALERTS_STORAGE_KEY, JSON.stringify(alerts));
+  }, [alerts]);
 
   const addAlert = () => {
     const newAlert: Alert = {
@@ -38,7 +51,7 @@ export default function AlertsConfig() {
     ));
   };
 
-  const enableAlert = (alert: Alert) => {
+  const toggleAlert = (alert: Alert) => {
     const alertData = {
       userId: email,
       baseCurrency: alert.currency,
@@ -47,19 +60,23 @@ export default function AlertsConfig() {
       highThreshold: alert.upperThreshold
     };
 
-    fetch('https://nestjs-backend.cfapps.us10-001.hana.ondemand.com/forex-alerts/forex', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(alertData)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Alert enabled:', data);
-      updateAlert(alert.id, { enabled: true });
-    })
-    .catch(error => console.error('Error enabling alert:', error));
+    if (!alert.enabled) {
+      fetch('https://nestjs-backend.cfapps.us10-001.hana.ondemand.com/forex-alerts/forex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(alertData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Alert enabled:', data);
+        updateAlert(alert.id, { enabled: true });
+      })
+      .catch(error => console.error('Error enabling alert:', error));
+    } else {
+      updateAlert(alert.id, { enabled: false });
+    }
   };
 
   return (
@@ -71,20 +88,20 @@ export default function AlertsConfig() {
           className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Alert</span>
+          <span>Add Threshold</span>
         </button>
       </div>
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
         <div className="max-w-md">
-          <label className="block text-sm font-medium text-gray-700">Email Address</label>
+          <label className="block text-sm font-medium text-gray-700">User Id</label>
           <div className="mt-1">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              placeholder="Enter your email"
+              placeholder="Enter your userId"
             />
           </div>
           <p className="mt-2 text-sm text-gray-500">
@@ -134,12 +151,26 @@ export default function AlertsConfig() {
                     </select>
                   )}
                 </div>
-                <button
-                  onClick={() => removeAlert(alert.id)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => toggleAlert(alert)}
+                    className={`px-4 py-2 rounded-lg text-white ${alert.enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                  >
+                    {alert.enabled ? 'Disable Alert' : 'Enable Alert'}
+                  </button>
+                  <button
+                    onClick={() => console.log('Edit alert', alert.id)}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => removeAlert(alert.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -160,14 +191,6 @@ export default function AlertsConfig() {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   />
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => enableAlert(alert)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Enable Alert
-                </button>
               </div>
             </div>
           ))}
