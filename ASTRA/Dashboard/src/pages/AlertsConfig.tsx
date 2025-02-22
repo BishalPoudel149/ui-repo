@@ -47,7 +47,7 @@ export default function AlertsConfig() {
       highThreshold: alert.upperThreshold
     };
 
-    fetch('http://localhost:3600/forex-alerts/forex', {
+    fetch('https://nestjs-backend.cfapps.us10-001.hana.ondemand.com/forex-alerts/forex', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
