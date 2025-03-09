@@ -1,15 +1,12 @@
 import React, { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { authConfig } from "../utils/authConfig";
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
   const exchangeCodeForToken = useCallback(async (authCode: string) => {
-    const tokenUrl =
-      "https://aztwzrclb.trial-accounts.ondemand.com/oauth2/token";
-    const clientId = "ae1b718c-172b-4800-b72a-5daaa2a4952b";
-    const clientSecret = "3dAbrH9Yw=rfD_7YVf-RJdg34_HEqsv";
-    const redirectUri = "http://localhost:5173/login";
+    const { tokenUrl, clientId, clientSecret, redirectUri } = authConfig;
 
     const body = new URLSearchParams({
       grant_type: "authorization_code",
@@ -44,7 +41,7 @@ export default function LoginPage() {
     const token = localStorage.getItem("id_token");
     if (token) {
       try {
-        const response = await fetch("https://aztwzrclb.trial-accounts.ondemand.com/oauth2/userinfo", {
+        const response = await fetch(authConfig.userInfoUrl, {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -73,13 +70,11 @@ export default function LoginPage() {
   }, [exchangeCodeForToken]);
 
   const redirectToSSO = () => {
-    const authUrl =
-      "https://aztwzrclb.trial-accounts.ondemand.com/oauth2/authorize";
-    const clientId = "ae1b718c-172b-4800-b72a-5daaa2a4952b";
-    const redirectUri = encodeURIComponent("http://localhost:5173/login");
+    const { authUrl, clientId, redirectUri } = authConfig;
+    const redirect = encodeURIComponent(redirectUri);
     const scope = "openid";
 
-    window.location.href = `${authUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    window.location.href = `${authUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirect}&scope=${scope}`;
   };
 
   const handleSignUp = () => {

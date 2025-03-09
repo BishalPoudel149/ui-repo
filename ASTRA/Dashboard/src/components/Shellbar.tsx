@@ -7,7 +7,6 @@ import NotificationsPanel from './NotificationsPanel';
 const currentUser: UserType = {
   name: 'John',
   role: 'Treasury Analyst',
-  avatar: <User className="w-100 h-100" />,
   email: 'john.doe@example.com'
 };
 
@@ -93,11 +92,7 @@ export default function Shellbar() {
                 <Settings className="w-5 h-5" />
               </button>
               <div className="flex items-center space-x-3">
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="w-8 h-8 rounded-full"
-                />
+              <User className="w-8 h-8 rounded-full" />
                 <div className="hidden md:block">
                   <p className="text-sm font-medium">{currentUser.name}</p>
                   <p className="text-xs text-indigo-200">{currentUser.role}</p>
