@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { User, Bell, Settings, LineChart, TrendingUp, AlertTriangle } from 'lucide-react';
-import type { User as UserType } from '../types';
-import NotificationsPanel from './NotificationsPanel';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  User,
+  Bell,
+  Settings,
+  LineChart,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
+import type { User as UserType } from "../types";
+import NotificationsPanel from "./NotificationsPanel";
+import { isUserLoggedIn } from "../utils/userUtils";
 
-const currentUser: UserType = {
-  name: 'John',
-  role: 'Treasury Analyst',
-  email: 'john.doe@example.com'
-};
 
 export default function Shellbar() {
   const location = useLocation();
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false);
-  const authToken = localStorage.getItem("access_token");
+  const currentUser: UserType = JSON.parse(localStorage.getItem("user") || "{}");
 
   return (
     <>
@@ -29,7 +32,7 @@ export default function Shellbar() {
                 STRA
               </h1>
             </Link>
-            {authToken && authToken !== "null" && authToken !== "undefined" && (
+            {isUserLoggedIn() && (
               <nav className="hidden md:flex space-x-6">
                 <Link
                   to="/"
@@ -79,22 +82,24 @@ export default function Shellbar() {
             )}
           </div>
 
-          {authToken && authToken !== "null" && authToken !== "undefined" && (
+            {isUserLoggedIn() && (
             <div className="flex items-center space-x-6">
               <button
-                className="p-2 hover:bg-indigo-800 rounded-full relative"
-                onClick={() => setIsNotificationsPanelOpen(true)}
+              className="p-2 hover:bg-indigo-800 rounded-full relative"
+              onClick={() => setIsNotificationsPanelOpen(true)}
               >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-indigo-900" />
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-indigo-900" />
               </button>
               <button className="p-2 hover:bg-indigo-800 rounded-full">
                 <Settings className="w-5 h-5" />
               </button>
               <div className="flex items-center space-x-3">
-              <User className="w-8 h-8 rounded-full" />
+                <User className="w-8 h-8 rounded-full" />
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium">{currentUser.name}</p>
+                  <p className="text-sm font-medium">
+                    {currentUser.given_name}
+                  </p>
                   <p className="text-xs text-indigo-200">{currentUser.role}</p>
                 </div>
               </div>
@@ -103,7 +108,7 @@ export default function Shellbar() {
         </div>
       </header>
 
-      {authToken && authToken !== "null" && authToken !== "undefined" && (
+      {isUserLoggedIn() && (
         <NotificationsPanel
           isOpen={isNotificationsPanelOpen}
           onClose={() => setIsNotificationsPanelOpen(false)}
