@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { authConfig } from "../utils/authConfig";
+import { BarChart3, TrendingUp, Globe2 } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -82,25 +83,55 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-2xl font-semibold mb-10">
-          Welcome to ASTRA, <br />
-          Automated Strategic Treasury Risk Analyzer
-        </h1>
-        <div className="space-x-6">
-          <button
-            onClick={redirectToSSO}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Sign In
-          </button>
-          <button
-            onClick={handleSignUp}
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-          >
-            Sign Up
-          </button>
+    <div className="min-h-screen relative flex items-center justify-center">
+      <div className="w-full flex flex-col md:flex-row items-center">
+        <div className="flex-1">
+          <h2 className="text-3xl font-bold mb-14 ml-5 text-blue-900">Transform Your Financial Analytics</h2>
+          <div className="space-y-6">
+            <div className="flex items-start gap-4">
+              <BarChart3 className="w-6 h-6 mt-1 text-blue-600" />
+              <div>
+                <h3 className="font-semibold mb-2 text-gray-900">Real-time Analytics</h3>
+                <p className="text-gray-600">Monitor exchange rates and interest rates with advanced forecasting capabilities</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <TrendingUp className="w-6 h-6 mt-1 text-blue-600" />
+              <div>
+                <h3 className="font-semibold mb-2 text-gray-900">Strategic Insights</h3>
+                <p className="text-gray-600">Make informed decisions with predictive analytics and trend analysis</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <Globe2 className="w-6 h-6 mt-1 text-blue-600" />
+              <div>
+                <h3 className="font-semibold mb-2 text-gray-900">Global Coverage</h3>
+                <p className="text-gray-600">Comprehensive monitoring of international markets and rates</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className=" max-w-md p-8 rounded-xl shadow-lg border border-gray-200">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-2 text-blue-900">ASTRA</h1>
+            <p className="text-gray-600 mb-8 font-semibold">Automated Strategic Treasury Risk Analyzer</p>
+            
+            <div className="space-y-4">
+              <button
+                onClick={redirectToSSO}
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
+              >
+                Sign In with SSO
+              </button>
+              <button
+                onClick={handleSignUp}
+                className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-semibold"
+              >
+                Create Account
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

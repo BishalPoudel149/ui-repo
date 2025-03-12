@@ -12,13 +12,14 @@ import type { User as UserType } from "../types";
 import NotificationsPanel from "./NotificationsPanel";
 import { isUserLoggedIn } from "../utils/userUtils";
 
-
 export default function Shellbar() {
   const location = useLocation();
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const currentUser: UserType = JSON.parse(localStorage.getItem("user") || "{}");
+  const currentUser: UserType = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
 
   const handleLogout = async () => {
     const token = localStorage.getItem("access_token");
@@ -36,7 +37,7 @@ export default function Shellbar() {
 
   return (
     <>
-      <header className="bg-indigo-900 text-white px-6 py-4">
+      <header className="bg-indigo-900 text-white px-6 py-4 fixed top-0 left-0 right-0 z-50 ">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
@@ -97,14 +98,14 @@ export default function Shellbar() {
             )}
           </div>
 
-            {isUserLoggedIn() && (
+          {isUserLoggedIn() && (
             <div className="flex items-center space-x-6">
               <button
-              className="p-2 hover:bg-indigo-800 rounded-full relative"
-              onClick={() => setIsNotificationsPanelOpen(true)}
+                className="p-2 hover:bg-indigo-800 rounded-full relative"
+                onClick={() => setIsNotificationsPanelOpen(true)}
               >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-indigo-900" />
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-indigo-900" />
               </button>
               <button className="p-2 hover:bg-indigo-800 rounded-full">
                 <Settings className="w-5 h-5" />
@@ -112,23 +113,23 @@ export default function Shellbar() {
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <button
-                  className="flex items-center space-x-2 focus:outline-none"
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-2 focus:outline-none"
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   >
-                  <User className="w-8 h-8 rounded-full" />
+                    <User className="w-8 h-8 rounded-full" />
                   </button>
                   {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                  <button
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                  onClick={handleLogout}
-                  >
-                  Logout
-                  </button>
-                  </div>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                      <button
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </button>
+                    </div>
                   )}
                 </div>
-                
+
                 <div className="hidden md:block">
                   <p className="text-sm font-medium">
                     {currentUser.given_name}
