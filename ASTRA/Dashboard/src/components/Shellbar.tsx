@@ -17,6 +17,7 @@ export default function Shellbar() {
   const location = useLocation();
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const currentUser: UserType = JSON.parse(localStorage.getItem("user") || "{}");
 
   return (
@@ -95,7 +96,27 @@ export default function Shellbar() {
                 <Settings className="w-5 h-5" />
               </button>
               <div className="flex items-center space-x-3">
-                <User className="w-8 h-8 rounded-full" />
+                <div className="relative">
+                  <button
+                  className="flex items-center space-x-2 focus:outline-none"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  >
+                  <User className="w-8 h-8 rounded-full" />
+                  </button>
+                  {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
+                    <button
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                    onClick={() => {
+                      localStorage.clear();
+                      window.location.href = "/login";
+                    }}
+                    >
+                    Logout
+                    </button>
+                  </div>
+                  )}
+                </div>
                 <div className="hidden md:block">
                   <p className="text-sm font-medium">
                     {currentUser.given_name}
