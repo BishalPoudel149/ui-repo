@@ -122,13 +122,13 @@ export default function LoginPage() {
                 onClick={redirectToSSO}
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
               >
-                Sign In with SSO
+                Sign In
               </button>
               <button
                 onClick={handleSignUp}
                 className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-semibold"
               >
-                Create Account
+                Sign Up
               </button>
             </div>
           </div>
