@@ -20,6 +20,20 @@ export default function Shellbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const currentUser: UserType = JSON.parse(localStorage.getItem("user") || "{}");
 
+  const handleLogout = async () => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      await fetch("/api/oauth2/logout", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    }
+    localStorage.clear();
+    window.location.href = "/login";
+  };
+
   return (
     <>
       <header className="bg-indigo-900 text-white px-6 py-4">
@@ -105,18 +119,16 @@ export default function Shellbar() {
                   </button>
                   {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-                    <button
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                    onClick={() => {
-                      localStorage.clear();
-                      window.location.href = "/login";
-                    }}
-                    >
-                    Logout
-                    </button>
+                  <button
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  onClick={handleLogout}
+                  >
+                  Logout
+                  </button>
                   </div>
                   )}
                 </div>
+                
                 <div className="hidden md:block">
                   <p className="text-sm font-medium">
                     {currentUser.given_name}
