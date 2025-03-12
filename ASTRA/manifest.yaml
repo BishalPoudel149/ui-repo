@@ -1,0 +1,9 @@
+---
+applications:
+- name: astra
+  random-route: true
+  path: Dashboard
+  memory: 128M
+  buildpacks:
+          - https://github.com/cloudfoundry/nodejs-buildpack/releases/download/v1.7.28/nodejs-buildpack-cflinuxfs3-v1.7.28.zip
+  command: npm run start
