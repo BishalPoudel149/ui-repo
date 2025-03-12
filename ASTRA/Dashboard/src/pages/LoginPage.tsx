@@ -120,13 +120,13 @@ export default function LoginPage() {
             <div className="space-y-4">
               <button
                 onClick={redirectToSSO}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
+                className="w-full px-6 py-4 mb-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
               >
                 Sign In
               </button>
               <button
                 onClick={handleSignUp}
-                className="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-semibold"
+                className="w-full px-6 py-4 mb-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-semibold"
               >
                 Sign Up
               </button>
