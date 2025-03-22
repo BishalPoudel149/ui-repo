@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, DollarSign, Percent } from 'lucide-react';
+import { DollarSign, Percent } from 'lucide-react';
 import type { ForecastParameter } from '../types';
 
 const parameters: ForecastParameter[] = [
@@ -9,7 +9,7 @@ const parameters: ForecastParameter[] = [
 ];
 
 export default function ForecastPanel() {
-  const [forecast, setForecast] = useState({
+  const [forecast] = useState({
     interestRate: 6.25,
     exchangeRate: 86.65
   });
