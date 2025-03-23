@@ -1,21 +1,22 @@
 const URL = "ws://localhost:9083";
-let context;
-let stream: MediaStream;
-let currentFrameB64: any;
-let audioContext = null;
-let mediaRecorder = null;
-let processor = null;
-let webSocket:WebSocket;
-let pcmData:any = [];
-let interval = null;
+let currentFrameB64: string | null = null;
+let audioContext: AudioContext | null = null;
+let mediaRecorder: MediaRecorder | null = null;
+let processor: ScriptProcessorNode | null = null;
+let webSocket: WebSocket ;
+let pcmData: number[] = [];
+let interval: number | null = null;
 let initialized = false;
-let audioInputContext:AudioContext;
-let workletNode: AudioWorkletNode;
+let audioInputContext: AudioContext | null = null;
+let workletNode: AudioWorkletNode | null = null;
 
-async function startScreenShare(video: HTMLVideoElement) {
+interface User {
 
+}
+// Start screen sharing
+async function startScreenShare(video: HTMLVideoElement): Promise<MediaStream | null> {
     try {
-        stream = await navigator.mediaDevices.getDisplayMedia({
+        const stream = await navigator.mediaDevices.getDisplayMedia({
             video: {
                 width: { max: 640 },
                 height: { max: 480 },
@@ -25,33 +26,42 @@ async function startScreenShare(video: HTMLVideoElement) {
         video.srcObject = stream;
         await new Promise<void>(resolve => {
             video.onloadedmetadata = () => {
-                console.log("video loaded metadata");
+                console.log("Video loaded metadata");
                 resolve();
-            }
+            };
         });
 
-        return video.srcObject;
-
+        return stream;
     } catch (err) {
-        console.error("Error accessing the screen: ", err);
+        console.error("Error accessing the screen:", err);
+        return null;
     }
 }
 
-async function initializeAudioContext(setAudioContext: any) {
+// Initialize audio context
+async function initializeAudioContext(setAudioContext: (context: AudioContext) => void): Promise<void> {
     if (initialized) return;
 
-    audioInputContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext as typeof AudioContext)({
-            sampleRate: 24000
-        });
-    await audioInputContext.audioWorklet.addModule("pcm-processor.js");
-    workletNode = new AudioWorkletNode(audioInputContext, "pcm-processor");
-    workletNode.connect(audioInputContext.destination);
-    initialized = true;
-    setAudioContext(audioInputContext);
+    try {
+        audioInputContext = new (window.AudioContext || 
+            (window as any).webkitAudioContext as typeof AudioContext)({
+                sampleRate: 24000
+            });
+            
+        await audioInputContext.audioWorklet.addModule("pcm-processor.js");
+        workletNode = new AudioWorkletNode(audioInputContext, "pcm-processor");
+        workletNode.connect(audioInputContext.destination);
+        initialized = true;
+        setAudioContext(audioInputContext);
+        
+        console.log("Audio context initialized successfully");
+    } catch (error) {
+        console.error("Error initializing audio context:", error);
+    }
 }
 
-function base64ToArrayBuffer(base64: any) {
+// Convert base64 to ArrayBuffer
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
     const binaryString = window.atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -60,7 +70,8 @@ function base64ToArrayBuffer(base64: any) {
     return bytes.buffer;
 }
 
-function convertPCM16LEToFloat32(pcmData: any) {
+// Convert PCM16LE to Float32
+function convertPCM16LEToFloat32(pcmData: ArrayBuffer): Float32Array {
     const inputArray = new Int16Array(pcmData);
     const float32Array = new Float32Array(inputArray.length);
 
@@ -71,11 +82,18 @@ function convertPCM16LEToFloat32(pcmData: any) {
     return float32Array;
 }
 
-async function injestAudioChuckToPlay(base64AudioChunk: any) {
+// Process and play audio chunk
+async function injestAudioChuckToPlay(base64AudioChunk: string): Promise<void> {
+    if (!audioInputContext || !workletNode) {
+        console.error("Audio context or worklet node not initialized");
+        return;
+    }
+    
     try {
         if (audioInputContext.state === "suspended") {
             await audioInputContext.resume();
         }
+        
         const arrayBuffer = base64ToArrayBuffer(base64AudioChunk);
         const float32Data = convertPCM16LEToFloat32(arrayBuffer);
 
@@ -85,152 +103,232 @@ async function injestAudioChuckToPlay(base64AudioChunk: any) {
     }
 }
 
-async function startAudioInput() {
-    audioContext = new AudioContext({
-        sampleRate: 16000,
-    });
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-            channelCount: 1,
+// Start audio input
+async function startAudioInput(): Promise<void> {
+    if (audioContext) {
+        audioContext.close();
+    }
+    
+    try {
+        audioContext = new AudioContext({
             sampleRate: 16000,
-        },
-    });
+        });
 
-    const source = audioContext.createMediaStreamSource(stream);
-    processor = audioContext.createScriptProcessor(4096, 1, 1);
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                channelCount: 1,
+                sampleRate: 16000,
+            },
+        });
 
-    processor.onaudioprocess = (e) => {
-        const inputData = e.inputBuffer.getChannelData(0);
-        const pcm16 = new Int16Array(inputData.length);
-        for (let i = 0; i < inputData.length; i++) {
-            pcm16[i] = inputData[i] * 0x7fff;
-        }
-        pcmData.push(...pcm16);
-    };
+        const source = audioContext.createMediaStreamSource(stream);
+        processor = audioContext.createScriptProcessor(4096, 1, 1);
 
-    source.connect(processor);
-    processor.connect(audioContext.destination);
+        processor.onaudioprocess = (e) => {
+            const inputData = e.inputBuffer.getChannelData(0);
+            const pcm16 = new Int16Array(inputData.length);
+            
+            for (let i = 0; i < inputData.length; i++) {
+                pcm16[i] = inputData[i] * 0x7fff;
+            }
+            
+            pcmData.push(...Array.from(pcm16));
+        };
 
-    interval = setInterval(recordChunk, 3000);
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+
+        interval = window.setInterval(recordChunk, 3000);
+        console.log("Audio input started");
+    } catch (error) {
+        console.error("Error starting audio input:", error);
+    }
 }
 
-function sendVoiceMessage(b64PCM: any) {
-    if (webSocket == null) {
-        console.log("websocket not initialized");
+// Stop audio input
+function stopAudioInput(): void {
+    if (processor) {
+        processor.disconnect();
+        processor = null;
+    }
+    
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+
+    if (interval !== null) {
+        clearInterval(interval);
+        interval = null;
+    }
+    
+    pcmData = [];
+    console.log("Audio input stopped");
+}
+
+// Send voice message with screen capture
+function sendVoiceMessage(b64PCM: string): void {
+    if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+        console.log("WebSocket not initialized or not open");
         return;
     }
 
-    let payload = {
+    if (!currentFrameB64) {
+        console.log("No screen capture available");
+        return;
+    }
+
+
+    const payload = {
+        sessionId: localStorage.getItem("sessionId"),
         realtime_input: {
-            media_chunks: [{
-                mime_type: "audio/pcm",
-                data: b64PCM,
-            },
-            {
-                mime_type: "image/jpeg",
-                data: currentFrameB64,
-            },
+            media_chunks: [
+                {
+                    mime_type: "audio/pcm",
+                    data: b64PCM,
+                },
+                {
+                    mime_type: "image/jpeg",
+                    data: currentFrameB64,
+                },
             ],
         },
     };
 
+    // console.log(`payload sent:`,JSON.stringify(payload));
     webSocket.send(JSON.stringify(payload));
-    console.log("sent: ", payload);
+    console.log("Sent voice message with screen capture");
 }
 
-function recordChunk() {
+// Record and send audio chunk
+function recordChunk(): void {
+    if (pcmData.length === 0) {
+        console.log("No audio data to send");
+        return;
+    }
+    
     const buffer = new ArrayBuffer(pcmData.length * 2);
     const view = new DataView(buffer);
-    pcmData.forEach((value: any, index: number) => {
+    
+    pcmData.forEach((value, index) => {
         view.setInt16(index * 2, value, true);
     });
 
     const base64 = btoa(
-        String.fromCharCode.apply(null, new Uint8Array(buffer) as any)
+        String.fromCharCode.apply(null, Array.from(new Uint8Array(buffer)))
     );
 
     sendVoiceMessage(base64);
     pcmData = [];
 }
 
-function captureImage(video: HTMLVideoElement, canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
-    if (stream && video.videoWidth > 0 && video.videoHeight > 0 && context) {
+// Capture image from video
+function captureImage(video: HTMLVideoElement, canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void {
+    if (!video.srcObject) {
+        console.log("No video stream available");
+        return;
+    }
+    
+    if (video.videoWidth > 0 && video.videoHeight > 0) {
         canvas.width = 640;
         canvas.height = 480;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL("image/jpeg").split(",")[1].trim();
-        currentFrameB64 = imageData;
-    }
-    else {
-        console.log("no stream or video metadata not loaded");
-    }
-}
+        
+        try {
+            const imageData = canvas.toDataURL("image/jpeg").split(",")[1].trim();
+            currentFrameB64 = imageData;
 
-
-function receiveMessage(event: any) {
-    const messageData = JSON.parse(event.data);
-
-    if (messageData.text) {
-        console.log(`test form geimini ${messageData.text}`)
-        //displayMessage("GEMINI: " + response.text);
-    }
-    if (messageData.audioData) {
-        injestAudioChuckToPlay(messageData.audioData);
+        } catch (error) {
+            console.error("Error capturing image:", error);
+        }
+    } else {
+        console.log("Video dimensions not available yet");
     }
 }
 
-function connect(setWebSocket: any) {
-    console.log("connecting: ", URL);
-
-    webSocket = new WebSocket(URL);
-    setWebSocket(webSocket);
-
-    webSocket.onopen = (event) => {
-        console.log("websocket open: ", event);
-        sendInitialSetupMessage(webSocket);
-    };
-
-    webSocket.onclose = (event) => {
-        console.log("websocket closed: ", event);
-        alert("Connection closed");
-    };
-
-    webSocket.onerror = (event) => {
-        console.log("websocket error: ", event);
-    };
-
-    webSocket.onmessage = receiveMessage;
-
-    return webSocket;
+// Handle incoming messages
+function receiveMessage(event: MessageEvent, onTextReceived: (text: string) => void): void {
+    try {
+        const messageData = JSON.parse(event.data);
+        
+        if (messageData.text) {
+            console.log(`Text from Gemini: ${messageData.text}`);
+            onTextReceived(`GEMINI: ${messageData.text}`);
+        }
+        
+        if (messageData.audio) {
+            injestAudioChuckToPlay(messageData.audio);
+        }
+    } catch (error) {
+        console.error("Error processing received message:", error);
+    }
 }
 
+// Connect to WebSocket server
+async function connect(
+    setWebSocket: (ws: WebSocket) => void, 
+    onTextReceived: (text: string) => void
+): Promise<WebSocket> {
+    console.log("Connecting to WebSocket:", URL);
 
-function sendInitialSetupMessage(webSocket: WebSocket) {
+    return new Promise((resolve, reject) => {
+        webSocket = new WebSocket(URL);
+        
+        webSocket.onopen = (event) => {
+            console.log("WebSocket connection opened:", event);
+            sendInitialSetupMessage(webSocket);
+            setWebSocket(webSocket);
+            resolve(webSocket);
+        };
+
+        webSocket.onclose = (event) => {
+            console.log("WebSocket connection closed:", event);
+            alert("Connection closed");
+            reject(new Error("WebSocket connection closed"));
+        };
+
+        webSocket.onerror = (event) => {
+            console.log("WebSocket error:", event);
+            reject(new Error("WebSocket error"));
+        };
+
+        webSocket.onmessage = (event) => receiveMessage(event, onTextReceived);
+    });
+}
+
+// Send initial setup message
+function sendInitialSetupMessage(ws: WebSocket): void {
     console.log("Sending setup message...");
 
     // Retrieve user data from localStorage
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
-    // Extract required fields from local storage
-    const username = userData?.given_name || "Anonymous";
-    const sessionId = crypto.randomUUID(); // session id is dependent on new shared screen
-    const userId = userData?.user_uuid || crypto.randomUUID();
+    // Extract required fields
+    const userName = userData?.given_name || "Anonymous";
+    const sessionId = crypto.randomUUID();
+    localStorage.setItem("sessionId", sessionId);
 
-    const setup_client_message = {
+    const userId = userData?.user_uuid || crypto.randomUUID();
+    const setupMessage = {
         setup: {
             generation_config: { response_modalities: ["AUDIO"] },
         },
         userInfo: {
             userId,
-            username,
+            userName,
             sessionId,
         }
     };
 
-    webSocket.send(JSON.stringify(setup_client_message));
-
-    console.log("Setup message sent:", setup_client_message);
+    ws.send(JSON.stringify(setupMessage));
+    console.log("Setup message sent:", setupMessage);
 }
 
-export { startScreenShare, initializeAudioContext, connect,startAudioInput, captureImage};
+export { 
+    startScreenShare, 
+    initializeAudioContext, 
+    connect, 
+    startAudioInput, 
+    stopAudioInput, 
+    captureImage 
+};
