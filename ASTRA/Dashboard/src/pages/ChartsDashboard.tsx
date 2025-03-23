@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Calendar, DollarSign } from 'lucide-react';
 import type { Currency, DateRange } from '../types';
 import finalPredictedData from '../final_predicted_data.json';
+import ChatComponent from './ChatComponent';
 
 const currencies: Currency[] = [
   { code: 'USD', name: 'US Dollar' },
@@ -159,6 +160,7 @@ const ChartsDashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+        <ChatComponent />
       </div>
     </div>
   );

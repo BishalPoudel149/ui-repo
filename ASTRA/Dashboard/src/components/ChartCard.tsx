@@ -13,6 +13,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { format } from 'date-fns';
 import type { ChartData } from '../types';
+import ChatComponent from './ChatComponent';
 
 ChartJS.register(
   CategoryScale,
@@ -79,8 +80,17 @@ export default function ChartCard({ title, data, yAxisLabel, dateRange }: ChartC
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-white rounded-lg shadow-lg p-6 relative ">
+      <div className="relative">
+      </div>
       <div className="h-[400px]">
+        <button
+          className="fixed bottom-10 right-10 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-transform z-[1000]"
+          onClick={() => alert('Test button clicked!')}
+        >
+          Test
+        </button>
+        <ChatComponent />
         <Line options={options} data={chartData} />
       </div>
     </div>

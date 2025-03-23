@@ -5,6 +5,8 @@ import ChartsDashboard from './pages/ChartsDashboard';
 import MarketInsights from './pages/MarketInsights';
 import AlertsConfig from './pages/AlertsConfig';
 import WebSocketClientEmbed from './components/WebSocketClientEmbed';
+import LoginPage from './pages/LoginPage';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
@@ -13,10 +15,39 @@ function App() {
         <Shellbar />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <Routes>
-            <Route path="/" element={<ChartsDashboard />} />
-            <Route path="/insights" element={<MarketInsights />} />
-            <Route path="/alerts" element={<AlertsConfig />} />
-            <Route path="/smart-analysis" element={<WebSocketClientEmbed />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <ChartsDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/insights"
+              element={
+                <PrivateRoute>
+                  <MarketInsights />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/alerts"
+              element={
+                <PrivateRoute>
+                  <AlertsConfig />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/smart-analysis"
+              element={
+                <PrivateRoute>
+                  <WebSocketClientEmbed />
+                </PrivateRoute>
+              }
+            />
           </Routes>
         </main>
       </div>
